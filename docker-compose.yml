@@ -1,0 +1,45 @@
+version: '2'
+services:
+
+  db:
+    #image: mariadb:10.1
+    build: .
+    #container_name: lemp_mariadb
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=laravel
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=123456
+      - TZ=Asia/Bangkok
+#    command:
+#      'mysqld --innodb-flush-method=fsync'
+
+  php:
+    build: ./php
+    volumes:
+      - ./www/:/var/www/html
+      - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
+      - ./php/php.ini:/usr/local/etc/php/php.ini
+      - ./logs/php-fpm:/var/log/php-fpm
+    expose:
+      - "9000"
+
+  nginx:
+    image: nginx:stable-alpine
+    volumes:
+      - ./nginx/conf/nginx.conf:/etc/nginx/conf/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./logs/nginx:/var/log/nginx
+    volumes_from:
+      - php
+    ports:
+      - 80:80
+
+  pma:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8000:80"
