@@ -12,7 +12,11 @@ class ApiProductController extends Controller
 {
     public function index(Request $request)
     {
-        $products = Product::query()->select(['name', 'amount', 'category'])->get();
+        $products = Product::query()->select([
+            'name',
+            'amount',
+            'category'
+        ])->orderBy('updated_at', 'DESC')->paginate(100);
         return response()->json([
             'message' => 'success',
             'items' => $products
