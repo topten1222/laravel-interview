@@ -22,10 +22,13 @@ Route::get('login', function(){
     abort('401');
 })->name('login');
 
-Route::post('/register', 'ApiAuthController@register');
+Route::prefix('admin')->group(function (){
+    Route::post('/register', 'ApiAuthController@register');
+    Route::post('/login', 'ApiAuthController@login');
+});
 
-Route::post('/login', 'ApiAuthController@login');
+Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
 
-Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', 'ApiAuthController@me');
+    Route::post('/create-product', 'ApiProductController@create');
 });
