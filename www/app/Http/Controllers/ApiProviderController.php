@@ -89,8 +89,8 @@ class ApiProviderController extends Controller
      */
     protected function validateProvider($provider)
     {
-        if (!in_array($provider, ['facebook', 'twitter', 'google'])) {
-            return response()->json(['error' => 'Please login using facebook, twitter or google'], 422);
+        if (!in_array($provider, ['facebook', 'google'])) {
+            return response()->json(['error' => 'Please login using facebook or google'], 422);
         }
         return ;
     }
