@@ -37,11 +37,9 @@ class ApiAuthController extends Controller
             'password' => Hash::make($request->password),
             'group' => $request->group,
         ]);
-        $token = $user->createToken('auth_token', [$request->group])->plainTextToken;
 
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
+            'message' => 'success'
         ]);
     }
 
