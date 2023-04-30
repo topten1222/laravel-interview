@@ -28,7 +28,8 @@ Route::prefix('admin')->group(function (){
 });
 
 Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
-
     Route::get('/me', 'ApiAuthController@me');
+    Route::get('/products', 'ApiProductController@index');
     Route::post('/create-product', 'ApiProductController@create');
+    Route::post('/update-product/{id}', 'ApiProductController@update')->where(['id' => '[0-9]+']);
 });

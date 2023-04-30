@@ -19,7 +19,9 @@ class CreateProductLogTable extends Migration
             $table->decimal('amount', $precision = 8, $scale = 2);
             $table->string('category');
             $table->integer('created_by');
+            $table->unsignedBigInteger('product_id');
             $table->timestamps();
+            $table->foreign('product_id')->references('id')->on('product');
         });
     }
 
