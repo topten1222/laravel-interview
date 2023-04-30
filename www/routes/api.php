@@ -33,3 +33,6 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::post('/create-product', 'ApiProductController@create');
     Route::post('/update-product/{id}', 'ApiProductController@update')->where(['id' => '[0-9]+']);
 });
+
+Route::get('/login/{provider}', 'ApiProviderController@redirectToProvider');
+Route::get('/login/{provider}/callback', 'ApiProviderController@handleProviderCallback');

@@ -31,7 +31,7 @@ class ApiAuthController extends Controller
                 'error' => $errors
             ], 400);
         }
-        $user = User::create([
+        User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
