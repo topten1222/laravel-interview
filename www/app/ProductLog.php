@@ -13,6 +13,6 @@ class ProductLog extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'amount', 'category', 'created_by', 'product_id'
+        'name', 'price', 'category', 'created_by', 'product_id'
     ];
 }

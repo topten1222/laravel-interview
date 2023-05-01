@@ -81,7 +81,7 @@ class ApiOrderController extends Controller
                 $orderDetail = new OrderDetail();
                 $orderDetail->product_id = $item['product_id'];
                 $orderDetail->product_name = $product->name;
-                $orderDetail->product_price = $product->amount;
+                $orderDetail->product_price = $product->price;
                 $orderDetail->product_category = $product->category;
                 $orderDetail->product_quantity = $item['product_quantity'];
                 $orderDetail->order_id = $order->id;

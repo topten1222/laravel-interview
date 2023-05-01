@@ -16,7 +16,7 @@ class ApiProductController extends Controller
     {
         $products = Product::query()->select([
             'name',
-            'amount',
+            'price',
             'category'
         ])->orderBy('updated_at', 'DESC')->paginate(100);
         $res = [
@@ -50,7 +50,7 @@ class ApiProductController extends Controller
         }
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|unique:product|max:255',
-            'amount' => 'required|regex:/^\d+(\.\d{1,2})?$/',
+            'price' => 'required|regex:/^\d+(\.\d{1,2})?$/',
             'category' => 'required|string|max:255',
         ]);
         // Return errors if validation error occur.
@@ -68,13 +68,27 @@ class ApiProductController extends Controller
             ]);
             return response()->json($res, 400);
         }
-
-        Product::create([
-            'name' => $request->name,
-            'amount' => $request->amount,
-            'category' => $request->category,
-            'created_by' => $request->user()->id,
-        ]);
+        $product = new Product();
+        $product->name = $request->name;
+        $product->price = $request->price;
+        $product->category = $request->category;
+        $product->created_by = $request->user()->id;
+        if (!$product->save()) {
+            DB::rollBack();
+            $res = [
+                'message' => 'Can not save product',
+                'status' => 'failed'
+            ];
+            Log::channel('request')->info('request api url ' . $request->url(), [
+                'status_code' => 400,
+                'url' => $request->url(),
+                'request' => $request->all(),
+                'date' => date('d-m-Y H:i:s'),
+                'ip' => $request->ip(),
+                'response' => $res
+            ]);
+            return response($res, 400);
+        }
         $res = [
             'message' => 'success',
         ];
@@ -86,7 +100,7 @@ class ApiProductController extends Controller
             'response' => $res
         ]);
 
-        return response($res)->json();
+        return response()->json($res);
     }
 
     public function update(Request $request, string $id)
@@ -142,13 +156,28 @@ class ApiProductController extends Controller
         }
         DB::beginTransaction();
         try {
-            ProductLog::create([
-                'name' => $product->name,
-                'amount' => $product->amount,
-                'category' => $product->category,
-                'created_by' => $product->created_by,
-                'product_id' => $product->id
-            ]);
+            $productLog = new ProductLog();
+            $productLog->name = $product->name;
+            $productLog->price = $product->price;
+            $productLog->category = $product->category;
+            $productLog->created_by = $product->created_by;
+            $productLog->product_id = $product->id;
+            if (!$productLog->save()) {
+                DB::rollBack();
+                $res = [
+                    'message' => 'Can not update product log',
+                    'status' => 'failed'
+                ];
+                Log::channel('request')->info('request api url '.$request->url(), [
+                    'status_code' => 400,
+                    'url' => $request->url(),
+                    'request' => $request->all(),
+                    'date' => date('d-m-Y H:i:s'),
+                    'ip' => $request->ip(),
+                    'response' => $res
+                ]);
+                return response($res, 400);
+            }
             $product->name = !empty($request->name) ? $request->name : $product->name;
             $product->category = !empty($request->category) ? $request->category : $product->category;
             if (!$product->save()) {
@@ -195,7 +224,7 @@ class ApiProductController extends Controller
             'ip' => $request->ip(),
             'response' => $res
         ]);
-        return response($res)->json();
+        return response()->json($res);
     }
 
     public function lists(Request $request)
@@ -221,7 +250,7 @@ class ApiProductController extends Controller
         $products = Product::query()->select([
             'id',
             'name',
-            'amount',
+            'price',
             'category'
         ])->orderBy('updated_at', 'DESC')->paginate(100);
         Redis::set('product_page_' . $currentPage, json_encode($products), 'EX', 20);
