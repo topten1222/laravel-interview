@@ -32,6 +32,7 @@ class ApiAuthController extends Controller
                 'error' => $errors
             ];
             Log::channel('request')->info('request api url '.$request->url(), [
+                'status_code' => 400,
                 'url' => $request->url(),
                 'request' => $request->all(),
                 'date' => date('d-m-Y H:i:s'),
@@ -50,6 +51,7 @@ class ApiAuthController extends Controller
             'message' => 'success'
         ];
         Log::channel('request')->info('request api url '.$request->url(), [
+            'status_code' => 200,
             'url' => $request->url(),
             'request' => $request->all(),
             'date' => date('d-m-Y H:i:s'),
@@ -57,7 +59,7 @@ class ApiAuthController extends Controller
             'response' => $res
         ]);
 
-        return response($res)->json();
+        return response()->json($res);
     }
 
     public function login(Request $request)
@@ -73,6 +75,7 @@ class ApiAuthController extends Controller
                 'error' => $errors
             ];
             Log::channel('request')->info('request api url '.$request->url(), [
+                'status_code' => 400,
                 'url' => $request->url(),
                 'request' => $request->all(),
                 'date' => date('d-m-Y H:i:s'),
@@ -86,6 +89,7 @@ class ApiAuthController extends Controller
                 'message' => 'Invalid login details'
             ];
             Log::channel('request')->info('request api url '.$request->url(), [
+                'status_code' => 401,
                 'url' => $request->url(),
                 'request' => $request->all(),
                 'date' => date('d-m-Y H:i:s'),
@@ -102,13 +106,14 @@ class ApiAuthController extends Controller
             'token_type' => 'Bearer',
         ];
         Log::channel('request')->info('request api url '.$request->url(), [
+            'status_code' => 200,
             'url' => $request->url(),
             'request' => $request->all(),
             'date' => date('d-m-Y H:i:s'),
             'ip' => $request->ip(),
             'response' => $res
         ]);
-        return response($res)->json();
+        return response()->json($res);
     }
 
     public function me(Request $request)
@@ -118,6 +123,7 @@ class ApiAuthController extends Controller
                 'message' => 'permission denied'
             ];
             Log::channel('request')->info('request api url '.$request->url(), [
+                'status_code' => 403,
                 'url' => $request->url(),
                 'request' => $request->all(),
                 'date' => date('d-m-Y H:i:s'),

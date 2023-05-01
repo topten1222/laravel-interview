@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\OrderCreated;
 use App\Order;
 use App\OrderDetail;
 use App\Product;
@@ -29,6 +30,7 @@ class ApiOrderController extends Controller
                 'error' => $errors
             ];
             Log::channel('request')->info('request api url ' . $request->url(), [
+                'status_code' => 400,
                 'url' => $request->url(),
                 'request' => $request->all(),
                 'date' => date('d-m-Y H:i:s'),
@@ -59,7 +61,7 @@ class ApiOrderController extends Controller
                     'ip' => $request->ip(),
                     'response' => $res
                 ]);
-                return response($res, 400);
+                return response()->json($res, 400);
             }
             foreach ($request->items as $item) {
                 $product = Product::where(['id' => $item['product_id']])->first();
@@ -99,7 +101,7 @@ class ApiOrderController extends Controller
                         'ip' => $request->ip(),
                         'response' => $res
                     ]);
-                    return response($res, 400);
+                    return response()->json($res, 400);
                 }
             }
             DB::commit();
@@ -117,20 +119,21 @@ class ApiOrderController extends Controller
                 'ip' => $request->ip(),
                 'response' => $res
             ]);
-            return response($res, 400);
+            return response()->json($res, 400);
         }
         $res = [
             'message' => 'success',
         ];
         Log::channel('request')->info('request api url ' . $request->url(), [
-            'status_code' => 400,
+            'status_code' => 200,
             'url' => $request->url(),
             'request' => $request->all(),
             'date' => date('d-m-Y H:i:s'),
             'ip' => $request->ip(),
             'response' => $res
         ]);
-        return response($res, 200);
+        event(new OrderCreated($order));
+        return response()->json($res);
     }
 
     public function getNextOrderNumber()
@@ -139,7 +142,7 @@ class ApiOrderController extends Controller
         if (!$lastOrder) {
             $number = 0;
         } else {
-            $number = substr($lastOrder->order_id, 3);
+            $number = $lastOrder->id;
         }
         return 'ORD_' . date('Y-m-d') . '_' . sprintf('%06d', intval($number) + 1);
     }

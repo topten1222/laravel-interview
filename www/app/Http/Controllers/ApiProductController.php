@@ -24,6 +24,7 @@ class ApiProductController extends Controller
             'items' => $products
         ];
         Log::channel('request')->info('request api url '.$request->url(), [
+            'status_code' => 200,
             'url' => $request->url(),
             'request' => $request->all(),
             'date' => date('d-m-Y H:i:s'),
@@ -40,6 +41,7 @@ class ApiProductController extends Controller
                 'message' => 'permission denied'
             ];
             Log::channel('request')->info('request api url '.$request->url(), [
+                'status_code' => 403,
                 'url' => $request->url(),
                 'request' => $request->all(),
                 'date' => date('d-m-Y H:i:s'),
@@ -60,6 +62,7 @@ class ApiProductController extends Controller
                 'error' => $errors
             ];
             Log::channel('request')->info('request api url '.$request->url(), [
+                'status_code' => 400,
                 'url' => $request->url(),
                 'request' => $request->all(),
                 'date' => date('d-m-Y H:i:s'),
@@ -93,6 +96,7 @@ class ApiProductController extends Controller
             'message' => 'success',
         ];
         Log::channel('request')->info('request api url '.$request->url(), [
+            'status_code' => 200,
             'url' => $request->url(),
             'request' => $request->all(),
             'date' => date('d-m-Y H:i:s'),
@@ -217,7 +221,7 @@ class ApiProductController extends Controller
             'message' => 'success',
         ];
         Log::channel('request')->info('request api url '.$request->url(), [
-            'status_code' => 400,
+            'status_code' => 200,
             'url' => $request->url(),
             'request' => $request->all(),
             'date' => date('d-m-Y H:i:s'),
@@ -239,6 +243,7 @@ class ApiProductController extends Controller
                 'data' => $products,
             ];
             Log::channel('request')->info('request api url '.$request->url(), [
+                'status_code' => 200,
                 'url' => $request->url(),
                 'request' => $request->all(),
                 'date' => date('d-m-Y H:i:s'),
@@ -259,6 +264,7 @@ class ApiProductController extends Controller
             'items' => $products
         ];
         Log::channel('request')->info('request api url '.$request->url(), [
+            'status_code' => 200,
             'url' => $request->url(),
             'request' => $request->all(),
             'date' => date('d-m-Y H:i:s'),

@@ -15,4 +15,8 @@ class Order extends Model
     protected $fillable = [
         'code', 'email', 'phone', 'address', 'address_tax'
     ];
+
+    protected $hidden = [
+        'id'
+    ];
 }
