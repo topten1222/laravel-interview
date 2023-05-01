@@ -6,6 +6,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -27,9 +28,17 @@ class ApiAuthController extends Controller
         // Return errors if validation error occur.
         if ($validator->fails()) {
             $errors = $validator->errors();
-            return response()->json([
+            $res = [
                 'error' => $errors
-            ], 400);
+            ];
+            Log::channel('request')->info('request api url '.$request->url(), [
+                'url' => $request->url(),
+                'request' => $request->all(),
+                'date' => date('d-m-Y H:i:s'),
+                'ip' => $request->ip(),
+                'response' => $res
+            ]);
+            return response()->json($res, 400);
         }
         User::create([
             'name' => $request->name,
@@ -37,10 +46,18 @@ class ApiAuthController extends Controller
             'password' => Hash::make($request->password),
             'group' => $request->group,
         ]);
-
-        return response()->json([
+        $res = [
             'message' => 'success'
+        ];
+        Log::channel('request')->info('request api url '.$request->url(), [
+            'url' => $request->url(),
+            'request' => $request->all(),
+            'date' => date('d-m-Y H:i:s'),
+            'ip' => $request->ip(),
+            'response' => $res
         ]);
+
+        return response($res)->json();
     }
 
     public function login(Request $request)
@@ -52,30 +69,62 @@ class ApiAuthController extends Controller
         // Return errors if validation error occur.
         if ($validator->fails()) {
             $errors = $validator->errors();
-            return response()->json([
+            $res = [
                 'error' => $errors
-            ], 400);
+            ];
+            Log::channel('request')->info('request api url '.$request->url(), [
+                'url' => $request->url(),
+                'request' => $request->all(),
+                'date' => date('d-m-Y H:i:s'),
+                'ip' => $request->ip(),
+                'response' => $res
+            ]);
+            return response()->json($res, 400);
         }
         if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json([
+            $res = [
                 'message' => 'Invalid login details'
-            ], 401);
+            ];
+            Log::channel('request')->info('request api url '.$request->url(), [
+                'url' => $request->url(),
+                'request' => $request->all(),
+                'date' => date('d-m-Y H:i:s'),
+                'ip' => $request->ip(),
+                'response' => $res
+            ]);
+            return response()->json($res, 401);
         }
         $user = User::where('email', $request['email'])->firstOrFail();
         $user->tokens()->delete();
         $token = $user->createToken('auth_token', [$user->group])->plainTextToken;
-        return response()->json([
+        $res = [
             'access_token' => $token,
             'token_type' => 'Bearer',
+        ];
+        Log::channel('request')->info('request api url '.$request->url(), [
+            'url' => $request->url(),
+            'request' => $request->all(),
+            'date' => date('d-m-Y H:i:s'),
+            'ip' => $request->ip(),
+            'response' => $res
         ]);
+        return response($res)->json();
     }
 
     public function me(Request $request)
     {
         if (!$request->user()->tokenCan('Editor')) {
-            return response()->json([
+            $res = [
                 'message' => 'permission denied'
-            ], 403);
+            ];
+            Log::channel('request')->info('request api url '.$request->url(), [
+                'url' => $request->url(),
+                'request' => $request->all(),
+                'date' => date('d-m-Y H:i:s'),
+                'ip' => $request->ip(),
+                'response' => $res
+            ]);
+            return response()->json($res, 403);
         }
         return $request->user();
     }

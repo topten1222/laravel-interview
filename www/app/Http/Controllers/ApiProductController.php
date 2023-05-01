@@ -6,6 +6,7 @@ use App\Product;
 use App\ProductLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Validator;
 
@@ -18,18 +19,34 @@ class ApiProductController extends Controller
             'amount',
             'category'
         ])->orderBy('updated_at', 'DESC')->paginate(100);
-        return response()->json([
+        $res = [
             'message' => 'success',
             'items' => $products
+        ];
+        Log::channel('request')->info('request api url '.$request->url(), [
+            'url' => $request->url(),
+            'request' => $request->all(),
+            'date' => date('d-m-Y H:i:s'),
+            'ip' => $request->ip(),
+            'response' => $res
         ]);
+        return response()->json($res);
     }
 
     public function create(Request $request)
     {
         if (!$request->user()->tokenCan('Admin')) {
-            return response()->json([
+            $res = [
                 'message' => 'permission denied'
-            ], 403);
+            ];
+            Log::channel('request')->info('request api url '.$request->url(), [
+                'url' => $request->url(),
+                'request' => $request->all(),
+                'date' => date('d-m-Y H:i:s'),
+                'ip' => $request->ip(),
+                'response' => $res
+            ]);
+            return response()->json($res, 403);
         }
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|unique:product|max:255',
@@ -39,9 +56,17 @@ class ApiProductController extends Controller
         // Return errors if validation error occur.
         if ($validator->fails()) {
             $errors = $validator->errors();
-            return response()->json([
+            $res = [
                 'error' => $errors
-            ], 400);
+            ];
+            Log::channel('request')->info('request api url '.$request->url(), [
+                'url' => $request->url(),
+                'request' => $request->all(),
+                'date' => date('d-m-Y H:i:s'),
+                'ip' => $request->ip(),
+                'response' => $res
+            ]);
+            return response()->json($res, 400);
         }
 
         Product::create([
@@ -50,24 +75,50 @@ class ApiProductController extends Controller
             'category' => $request->category,
             'created_by' => $request->user()->id,
         ]);
-
-        return response()->json([
+        $res = [
             'message' => 'success',
+        ];
+        Log::channel('request')->info('request api url '.$request->url(), [
+            'url' => $request->url(),
+            'request' => $request->all(),
+            'date' => date('d-m-Y H:i:s'),
+            'ip' => $request->ip(),
+            'response' => $res
         ]);
+
+        return response($res)->json();
     }
 
     public function update(Request $request, string $id)
     {
         if (!$request->user()->tokenCan('Admin') && !$request->user()->tokenCan('Editor')) {
-            return response()->json([
+            $res = [
                 'message' => 'permission denied'
-            ], 403);
+            ];
+            Log::channel('request')->info('request api url '.$request->url(), [
+                'status_code' => 400,
+                'url' => $request->url(),
+                'request' => $request->all(),
+                'date' => date('d-m-Y H:i:s'),
+                'ip' => $request->ip(),
+                'response' => $res
+            ]);
+            return response()->json($res, 403);
         }
         $product = Product::where(['id' => $id])->first();
         if (!$product) {
-            return response()->json([
+            $res = [
                 'message' => 'not found product'
-            ], 404);
+            ];
+            Log::channel('request')->info('request api url '.$request->url(), [
+                'status_code' => 400,
+                'url' => $request->url(),
+                'request' => $request->all(),
+                'date' => date('d-m-Y H:i:s'),
+                'ip' => $request->ip(),
+                'response' => $res
+            ]);
+            return response()->json($res, 404);
         }
         $validator = Validator::make($request->all(), [
             'name' => 'string|unique:product|max:255',
@@ -76,9 +127,18 @@ class ApiProductController extends Controller
         // Return errors if validation error occur.
         if ($validator->fails()) {
             $errors = $validator->errors();
-            return response()->json([
+            $res = [
                 'error' => $errors
-            ], 400);
+            ];
+            Log::channel('request')->info('request api url '.$request->url(), [
+                'status_code' => 400,
+                'url' => $request->url(),
+                'request' => $request->all(),
+                'date' => date('d-m-Y H:i:s'),
+                'ip' => $request->ip(),
+                'response' => $res
+            ]);
+            return response()->json($res, 400);
         }
         DB::beginTransaction();
         try {
@@ -93,23 +153,49 @@ class ApiProductController extends Controller
             $product->category = !empty($request->category) ? $request->category : $product->category;
             if (!$product->save()) {
                 DB::rollBack();
-                return response([
+                $res = [
                     'message' => 'Can not update product',
                     'status' => 'failed'
-                ], 400);
+                ];
+                Log::channel('request')->info('request api url '.$request->url(), [
+                    'status_code' => 400,
+                    'url' => $request->url(),
+                    'request' => $request->all(),
+                    'date' => date('d-m-Y H:i:s'),
+                    'ip' => $request->ip(),
+                    'response' => $res
+                ]);
+                return response($res, 400);
             }
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack(); // Tell Laravel, "It's not you, it's me. Please don't persist to DB"
-            return response([
+            $res = [
                 'message' => $e->getMessage(),
                 'status' => 'failed'
-            ], 400);
+            ];
+            Log::channel('request')->info('request api url '.$request->url(), [
+                'status_code' => 400,
+                'url' => $request->url(),
+                'request' => $request->all(),
+                'date' => date('d-m-Y H:i:s'),
+                'ip' => $request->ip(),
+                'response' => $res
+            ]);
+            return response($res, 400);
         }
-
-        return response()->json([
+        $res = [
             'message' => 'success',
+        ];
+        Log::channel('request')->info('request api url '.$request->url(), [
+            'status_code' => 400,
+            'url' => $request->url(),
+            'request' => $request->all(),
+            'date' => date('d-m-Y H:i:s'),
+            'ip' => $request->ip(),
+            'response' => $res
         ]);
+        return response($res)->json();
     }
 
     public function lists(Request $request)
@@ -119,10 +205,18 @@ class ApiProductController extends Controller
         $cachedProducts = Redis::get('product_page_' . $currentPage);
         if(isset($cachedProducts)) {
             $products = json_decode($cachedProducts, FALSE);
-            return response()->json([
+            $res = [
                 'message' => 'Fetched from redis',
                 'data' => $products,
+            ];
+            Log::channel('request')->info('request api url '.$request->url(), [
+                'url' => $request->url(),
+                'request' => $request->all(),
+                'date' => date('d-m-Y H:i:s'),
+                'ip' => $request->ip(),
+                'response' => $res
             ]);
+            return response()->json($res);
         }
         $products = Product::query()->select([
             'id',
@@ -131,9 +225,17 @@ class ApiProductController extends Controller
             'category'
         ])->orderBy('updated_at', 'DESC')->paginate(100);
         Redis::set('product_page_' . $currentPage, json_encode($products), 'EX', 20);
-        return response()->json([
+        $res = [
             'message' => 'success',
             'items' => $products
+        ];
+        Log::channel('request')->info('request api url '.$request->url(), [
+            'url' => $request->url(),
+            'request' => $request->all(),
+            'date' => date('d-m-Y H:i:s'),
+            'ip' => $request->ip(),
+            'response' => $res
         ]);
+        return response()->json($res);
     }
 }
