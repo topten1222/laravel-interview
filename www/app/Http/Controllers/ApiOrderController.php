@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\OrderCreated;
+use App\Jobs\SendEmailAdmin;
 use App\Order;
 use App\OrderDetail;
 use App\Product;
@@ -132,7 +132,7 @@ class ApiOrderController extends Controller
             'ip' => $request->ip(),
             'response' => $res
         ]);
-        event(new OrderCreated($order));
+        SendEmailAdmin::dispatch($order)->onQueue('email');
         return response()->json($res);
     }
 
