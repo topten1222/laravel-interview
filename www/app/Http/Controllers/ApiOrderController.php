@@ -20,6 +20,7 @@ class ApiOrderController extends Controller
             'phone' => 'required|numeric|digits:10',
             'address' => 'required|string',
             'address_tax' => 'string',
+            'items' => 'required',
             'items.*.product_id' => 'required|exists:product,id',
             'items.*.product_quantity' => 'required|numeric'
         ]);
