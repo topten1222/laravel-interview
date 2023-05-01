@@ -37,3 +37,4 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
 Route::get('/login/{provider}', 'ApiProviderController@redirectToProvider');
 Route::get('/login/{provider}/callback', 'ApiProviderController@handleProviderCallback');
 Route::get('/product/list', 'ApiProductController@lists');
+Route::post('/order/create', 'ApiOrderController@create');
