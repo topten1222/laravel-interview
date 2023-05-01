@@ -43,3 +43,12 @@ services:
     image: phpmyadmin/phpmyadmin
     ports:
       - "8000:80"
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis/data/redis:/data
+      - ./redis/config/redis.conf:/redis.conf
+    command: redis-server /redis.conf

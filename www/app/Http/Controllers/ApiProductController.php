@@ -6,6 +6,7 @@ use App\Product;
 use App\ProductLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Validator;
 
 class ApiProductController extends Controller
@@ -108,6 +109,31 @@ class ApiProductController extends Controller
 
         return response()->json([
             'message' => 'success',
+        ]);
+    }
+
+    public function lists(Request $request)
+    {
+        $currentPage = $request->get('page',1);
+
+        $cachedProducts = Redis::get('product_page_' . $currentPage);
+        if(isset($cachedProducts)) {
+            $products = json_decode($cachedProducts, FALSE);
+            return response()->json([
+                'message' => 'Fetched from redis',
+                'data' => $products,
+            ]);
+        }
+        $products = Product::query()->select([
+            'id',
+            'name',
+            'amount',
+            'category'
+        ])->orderBy('updated_at', 'DESC')->paginate(100);
+        Redis::set('product_page_' . $currentPage, json_encode($products), 'EX', 20);
+        return response()->json([
+            'message' => 'success',
+            'items' => $products
         ]);
     }
 }
